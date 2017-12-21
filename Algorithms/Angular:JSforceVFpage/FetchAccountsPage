@@ -1,46 +1,93 @@
-<apex:page controller="FetchAccountsController" sidebar="false">
-  <head>
- <style>
- #errors{color:red;font-size:15px;font-style:bold;margin:5px; width:100%;}
-  #result{color:green;font-size:25px;font-style:bold;margin:5px; width:100%;} 
- </style>
-
-<script>
- var getAccount = function(){
-var accountName = document.getElementById('account_name').value;
- 
-Visualforce.remoting
-.Manager.invokeAction('{!$RemoteAction.FetchAccountsController.getAccount}',            
-accountName,
-function(result,event){
- if(event.status){              
- document.getElementById('result').innerHTML="<p>   Name  :"+result.Name+"</p>"+ "<p>   Website :"+result.Site+"</p>" ;
-                }
- else{
-  document.getElementById('errors').innerHTML="Error --> "+event.message;
- }
- },
-{escape: true});
-               
- }// End of getAccount()
- </script>
-  </head>
- 
-<body>
-      <apex:pageBlock title="Javascript Remote Sample" >
-      <apex:pageBlockSection title="Search for an account" columns="2">
-         <div id="errors">
-          </div>
-         <div id="input">
-           <label>Enter the account name:</label>
-           <input type="text" name="account_name" id="account_name"/>
-           <button onclick="getAccount()">Get Account</button>
-  </div>
-       </apex:pageBlockSection>
-      </apex:pageBlock>
-      <apex:outputPanel >
-       <div id="result">
-       </div>
-      </apex:outputPanel>
-  </body>
+ <apex:page showHeader="false"   sidebar="false">
+   <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js" />
+   <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.10/angular.min.js"/>
+   <script src="//cdnjs.cloudflare.com/ajax/libs/jsforce/1.7.0/jsforce.min.js"></script>
+   <html xmlns:ng="http://angularjs.org" ng-app="accEntryApp" lang="en">
+      <head>
+         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+         <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap.no-icons.min.css" rel="stylesheet"/>
+         <link href="https://netdna.bootstrapcdn.com/font-awesome/2.0/css/font-awesome.css" rel="stylesheet"/>
+         <style>
+            .input-mysize { width: 900px }
+            .search-query {
+                padding-left: 469px;
+                background-repeat: no-repeat;
+                background-position: 562px 8px;
+            }
+         </style>
+      </head>
+      <div class="ng-app container">
+         <div class="navbar">
+            <div class="navbar-inner">
+               <a class="brand" href="">Accounting Entries with Exceptions</a>
+            </div>
+         </div>
+         <div ng-controller="ctrlRead">
+            <div class="input-append">
+               <input type="text" ng-model="accEntryQuery"  class="input-mysize  search-query" placeholder="Search"/>
+            </div>
+            <table class="table table-hover success">
+               <thead>
+                  <tr>
+                     <th class="id">Id&nbsp;<a ng-click="sort_by('id')"><i class="icon-sort"></i></a></th>
+                     <th class="name">Status</th>
+                     <th class="name">Company</th>
+                     <th class="name">Source Document</th>
+                     <th class="name">Period</th> 
+                     <th class="name">Period Status</th> 
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr ng-repeat="field in accEntries|filter:accEntryQuery" class="success">
+                     <td class="info">
+                        <apex:outputLink value="/{{field.Id}}">
+                           <apex:outputText value="{{field.Name}}" />
+                        </apex:outputLink>
+                     </td>
+                     <td class="info"> 
+                           <apex:outputText value="{{field.Status__c}}" /> 
+                     </td>
+                     <td class="info"> 
+                           <apex:outputText value="{{field.Company__r.Name}}" /> 
+                     </td>
+                     <td class="info"> 
+                           <apex:outputText value="{{field.Source_Document_Object_Name__c}}" /> 
+                     </td> 
+                     <td class="info"> 
+                           <apex:outputText value="{{field.Period__r.Name}}" /> 
+                     </td>
+                     <td class="info"> 
+                           <apex:outputText value="{{field.Period_Status__c}}" /> 
+                     </td> 
+                  </tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+      <!--- Javascript -->
+      <script type="text/javascript">
+         function ctrlRead($scope){  
+             var conn = new jsforce.Connection({ accessToken: '{!$Api.Session_Id}' });
+             var accEntryQuery = "SELECT Id, Name, Status__c,Company__r.Name,"+
+                                        "Source_Document_Object_Name__c,Exceptions_Count__c,"+
+                                        "Period__r.Name,Period_Status__c FROM Accounting_Entry__c";
+             //chunkEntireDB(200, 'Account');
+             
+             conn.query(accEntryQuery , function(error, res) {
+                 if (error) {
+                    console.log("error while querying"+error);
+                 } else {
+                     $scope.accEntries = res.records;
+                     console.log(res.records);
+                     $scope.$apply();
+                 }
+             });
+         }
+         
+    //————Use DAN chunking -----------// 
+         
+              
+         
+      </script>
+   </html>
 </apex:page>
