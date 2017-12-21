@@ -1,0 +1,153 @@
+<apex:page controller="nestedqueryexample4"  sidebar="false" 
+           standardStylesheets="false" docType="html-5.0" showHeader="false" >
+<html lang="en">
+<head> 
+    <title>Visibility DashBoard-VayuGroup</title> 
+
+    <!-- Bootstrap Core CSS -->
+    <apex:stylesheet value="{!URLFOR($Resource.bootstrap, 'bootstrap/css/bootstrap.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.bootstrap, 'bootstrap/css/bootstrap.min.css')}"/>
+     
+    <style>
+     .container{
+      padding-top : 20px;
+     }
+     body{
+          //gradient stuff
+     }
+    </style>    
+    <script>       
+          function switchMenu(obj,obj1,obj2) 
+        {
+            var el = document.getElementById(obj);                                       
+            if ( el.style.display != 'none' ) {
+            el.style.display = 'none';
+            }
+            else {
+            el.style.display = '';
+            }
+            var e2 = document.getElementById(obj1);                                       
+            if ( e2.style.display != 'none' ) {
+            e2.style.display = 'none';
+            }
+            else {
+            e2.style.display = '';
+            }
+             var e3 = document.getElementById(obj2);                                       
+            if ( e2.style.display != 'none' ) {
+            e3.style.display = 'none';
+            }
+            else {
+            e3.style.display = '';
+            }
+
+        }
+         
+  </script>
+</head> 
+
+ <body class="container">   
+   <h2 class="page-header">Visibility Dashboard</h2>
+    <apex:pageblock> 
+    <apex:form > 
+    <div class="row"> 
+  <apex:pageBlockTable value="{!customers}"  var="customer" styleClass="table table-bordered">
+     <apex:column headerValue="Customers" styleClass="col-md-5">
+                    <apex:inputField value="{!customer.Name}" styleClass="all_customers"/>
+    </apex:column>
+     <apex:column >
+           <apex:facet name="header">                                        
+         		Related Businesses                                                                         
+           </apex:facet>
+            <apex:outputpanel id="plusimage">
+             	 <apex:image url="{!$Resource.Plus_Image}" 
+                               width="20" height="20" 
+                             onclick="switchMenu('{!$Component.inlinebusinesstable}','{!$Component.minusimage}','{!$Component.plusimage}')" title="Show Businesses"/> 
+            </apex:outputpanel>
+            <apex:outputpanel id="minusimage" style="display:none;">
+                          <apex:image url="{!$Resource.Minus_image}" 
+                              width="20" height="20"
+                              onclick="switchMenu('{!$Component.inlinebusinesstable}','{!$Component.plusimage}','{!$Component.minusimage}')" title="Collapse - Businesses"/>
+            </apex:outputpanel>
+            <apex:variable value="{!0}" var="numOfBusinesses"/>
+            <apex:repeat var="count" value="{!customer.Businesses__r}">
+             <apex:variable var="numOfBusinesses" value="{!numOfBusinesses+1}"/>
+             </apex:repeat> 
+<apex:outputText rendered="{!numOfBusinesses=0}">No businesses     </apex:outputText>
+<apex:outputText rendered="{!numOfBusinesses!=0}" value="{!numOfBusinesses} "> </apex:outputText> 
+
+<apex:outputPanel id="inlinebusinesstable"  style="display:none;">
+ <apex:pageblocktable value="{!customer.Businesses__r}" var="business" >
+    <apex:column headerValue="Related Businesses"  width="100%">
+      <ul>
+        <li>
+         <h4> 
+<apex:inputfield value="{!business.Name}"/> </h4>
+       <apex:outputText rendered="{!business.Total_Products__c=0}" 
+                       value=" ***No Products to show****" 
+                       styleClass="alert alert-info"/> 
+
+ <apex:outputpanel id="prod_plusimage"rendered="{!business.Total_Products__c!=0}">
+    <apex:commandLink action="{!setProducts}"   reRender="products">
+       <apex:param name="business_id" value="{!business.id}"
+                   assignTo="{!current_business}"/>
+        <apex:image url="{!$Resource.Plus_Image}" width="20" height="20" 
+                                               onclick="switchMenu('{!$Component.products}',
+'{!$Component.prod_minusimage}',
+'{!$Component.prod_plusimage}')"
+ title="Show products"/>  
+   </apex:commandLink>
+   <apex:outputText rendered="{!business.Total_Products__c!=0}" 
+                    value="{!business.Total_Products__c} Products" 
+                    style="margin:5px;"/> 
+                                     
+  </apex:outputpanel>
+
+
+ <apex:outputpanel id="prod_minusimage" style="display:none;" >
+    <apex:image url="{!$Resource.Minus_image}" width="20" height="20"                                         
+
+onclick="switchMenu('{!$Component.products}',
+'{!$Component.prod_plusimage}',
+'{!$Component.prod_minusimage}')" 
+title="Hide products"/> 
+ </apex:outputpanel>
+ 
+<apex:outputPanel id="products" title="Related products"                                                           
+
+rendered="{!business.Total_Products__c!=0}">
+  <apex:pageBlockTable value="{!products}" var="product" 
+ width="100%" style="border:2px solid grey;">
+ <apex:column headerValue="Product Name">
+  	<apex:inputField value="{!product.name}"/>                                             
+ </apex:column>
+ <apex:column headerValue="Marketing Commit">
+                {!product.Marketing_Commit__c}
+ </apex:column>
+ <apex:column headerValue="Total Visibility">                                        
+
+{!product.Total_Visibility_per_product__c}
+ </apex:column>                                        
+ </apex:pageBlockTable> 
+ </apex:outputPanel>
+  </li>
+ </ul>
+ </apex:column> 
+   </apex:pageblocktable>
+  </apex:outputPanel>
+                     
+ </apex:column>
+ <apex:column headervalue="Customer Theater">
+                    {!customer.Theater__c}
+  </apex:column>
+ <apex:column headervalue="Total Visibility">
+                     {!customer.Total_Visibility__c}
+ </apex:column> 
+ </apex:pageBlockTable> 
+ </div>     
+  </apex:form>                      
+ </apex:pageblock> 
+  </body> 
+ </html>
+</apex:page>
+ 
