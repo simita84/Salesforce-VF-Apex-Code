@@ -1,0 +1,76 @@
+ global class CleanUpRecords implements Database.Batchable<sObject>,
+			Database.Stateful{
+    public String query;
+    public Integer BatchErrorCount=0;
+    public Map<string,set<id>> mapMsgToRec = new map<string,set<id>>(); 	
+    public List<String> messages = new List<String>();
+
+    public CleanUpRecords(String q){
+        query = q;
+    }
+    global Database.QueryLocator start(Database.BatchableContext BC){
+        return Database.getQueryLocator(query);        
+    }
+    
+   global void execute(Database.BatchableContext BC,List<sObject> scope){
+        Boolean batchHasError=false;
+
+        list<Database.DeleteResult> drList  = Database.delete(scope.false);
+	 for(Database.DeleteResult dr : drList){
+  	 	if (dr.isSuccess()) {
+   			System.debug('Successfully deleted AE with ID: ' + dr.getId());
+   	 	}else{
+			batchHasError=true;
+		for(Database.Error err:dr.getErrors()){
+  		 if(mErrMsgToRecId.containsKey(err.getMessage())){ 	 
+			mapMsgToRec.get(err.getMessage()).add(dr.getId());}
+       		 else{
+       			mapMsgToRec.put(err.getMessage(),new set<id>{dr.getId()});} 
+		}
+   	      }
+	}	
+	if(BatchHasError) 
+		BatchErrorCount = BatchErrorCount+1;// batch is Stateful
+	}
+  
+       //Permanently delete the specified records from the Recycle Bin. 
+	//Database.emptyRecycleBin(scope);
+    	}
+    	
+   global void finish(Database.BatchableContext BC){
+
+	for(string eachErrorMessage:mErrMsgToRecId.keyset())
+        {
+	string errRecs = string.join(new list<id>(mErrMsgToRecId.get(eachErrorMessage)), ',');
+	messages.add( 'The  records '+ errRecs,'  have following errors '
+				+eachErrorMessage);
+        	
+        }
+	system.debug('messages'+messages);
+
+	//Send to Chatter : Todo
+	//BatchToChatter.processBatchInformation(info.getJobId(), this, messages);
+
+        //find the apex job id
+	 AsyncApexJob job = [SELECT Id, Status, 
+			NumberOfErrors, JobItemsProcessed,       TotalJobItems, CreatedBy.Email
+                       FROM AsyncApexJob
+                       WHERE
+                       Id =:BC.getJobId() ];
+ 	//sent email to the submitter to confirm cleanse operation on account
+	Messaging.SingleEmailMessage mail= new    Messaging.SingleEmailMessage();
+ 	List<String> toAddresses = new List<String>{job.CreatedBy.Email};
+     	 mail.setToAddresses(toAddresses);
+      	mail.setSubject('Record Clean Up status'+job.Status);
+	mail.setPlainTextBody('The batch job processed with'+job.NumberOfErrors+
+		'and status is'+job.Status+'Total Job    Items'+job.TotalJobItems+ ‘Error messages’+messages);
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});
+   	 }
+	} 
+	/** 
+	#Execution from DEV Console
+
+	String query ='select id from account where type =\'prospect\' ';
+	Database.executeBatch(new CleanUpRecords(query)); 
+	*/
+
