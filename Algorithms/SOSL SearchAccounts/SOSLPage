@@ -1,0 +1,41 @@
+ <apex:page controller="SearchAll">
+<apex:form >
+  <apex:pageBlock title="Search" >
+      <apex:pageBlockSection >
+       <apex:inputText id="searchText" value="{!searchText}"/>
+      </apex:pageBlockSection>
+      <apex:commandButton action="{!search}" value="Search" reRender="SearchResults"/>
+  </apex:pageBlock>   
+  </apex:form> 
+    <apex:form > 
+          <apex:outputPanel id="SearchResults">
+              <apex:pageBlock title="Search Results">
+                  <apex:pageBlockSection >  
+                    <apex:dataTable value="{!accounts}" var="account" border="1">                         
+                        <apex:column >
+                            <apex:commandLink value="{!account.name}" action="{!view}">
+                             <apex:param name="current_account_id" value="{!account.id}"/>  
+                            </apex:commandLink> 
+                            <apex:facet name="header">Account Name</apex:facet>
+                        </apex:column>                     
+                        <apex:column value=" {!account.site}">
+                             <apex:facet name="header">Account Website</apex:facet>
+                         </apex:column>
+                    </apex:dataTable>
+                    <apex:dataTable value="{!contacts}" var="contact" border="1"> 
+                        <apex:column value=" {!contact.firstname}">
+                             <apex:facet name="header">Contact Firstname</apex:facet>
+                         </apex:column>
+                        <apex:column value=" {!contact.lastname}">
+                             <apex:facet name="header">Contact Lastname</apex:facet>
+                         </apex:column>
+                        <apex:column value=" {!contact.email}">
+                             <apex:facet name="header">Contact Email</apex:facet>
+                         </apex:column>
+                    </apex:dataTable>
+              </apex:pageBlockSection>
+        </apex:pageBlock>
+       </apex:outputPanel>
+     </apex:form>    
+</apex:page>
+
