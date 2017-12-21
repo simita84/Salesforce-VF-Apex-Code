@@ -1,0 +1,46 @@
+<apex:page controller="FetchAccountsController" sidebar="false">
+  <head>
+ <style>
+ #errors{color:red;font-size:15px;font-style:bold;margin:5px; width:100%;}
+  #result{color:green;font-size:25px;font-style:bold;margin:5px; width:100%;} 
+ </style>
+
+<script>
+ var getAccount = function(){
+var accountName = document.getElementById('account_name').value;
+ 
+Visualforce.remoting
+.Manager.invokeAction('{!$RemoteAction.FetchAccountsController.getAccount}',            
+accountName,
+function(result,event){
+ if(event.status){              
+ document.getElementById('result').innerHTML="<p>   Name  :"+result.Name+"</p>"+ "<p>   Website :"+result.Site+"</p>" ;
+                }
+ else{
+  document.getElementById('errors').innerHTML="Error --> "+event.message;
+ }
+ },
+{escape: true});
+               
+ }// End of getAccount()
+ </script>
+  </head>
+ 
+<body>
+      <apex:pageBlock title="Javascript Remote Sample" >
+      <apex:pageBlockSection title="Search for an account" columns="2">
+         <div id="errors">
+          </div>
+         <div id="input">
+           <label>Enter the account name:</label>
+           <input type="text" name="account_name" id="account_name"/>
+           <button onclick="getAccount()">Get Account</button>
+  </div>
+       </apex:pageBlockSection>
+      </apex:pageBlock>
+      <apex:outputPanel >
+       <div id="result">
+       </div>
+      </apex:outputPanel>
+  </body>
+</apex:page>
