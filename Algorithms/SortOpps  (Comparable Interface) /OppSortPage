@@ -1,0 +1,26 @@
+<apex:page controller="SortOppty" sidebar="false" showHeader="false">
+<style>
+    body{font-size:15px; width=100%;}
+</style>
+<body>
+<apex:pageBlock title="Sort Opportunities" > 
+    <apex:form > 
+      Sort By:
+   <apex:selectList value="{!sortBy}" size="1">
+     <apex:selectOption itemValue="date" itemLabel="Created Date"></apex:selectOption>
+              <apex:selectOption itemValue="name" itemLabel="Name"></apex:selectOption>
+              <apex:selectOption itemValue="amount" itemLabel="Amount"></apex:selectOption>           
+          </apex:selectList>
+          <apex:commandButton action="{!sort}" value="Go"/>
+         </apex:form>
+      <apex:pageBlockSection >
+          <apex:pageBlockTable value="{!oppty}" var="oppor" id="OpptyList">
+           <apex:column value="{!oppor.oppty.Name}"/>
+           <apex:column value="{!oppor.oppty.amount}"/>
+           <apex:column value="{!oppor.oppty.createddate}"/>
+          </apex:pageBlockTable>
+      </apex:pageBlockSection>
+  </apex:pageBlock>
+ </body>
+</apex:page>
+
