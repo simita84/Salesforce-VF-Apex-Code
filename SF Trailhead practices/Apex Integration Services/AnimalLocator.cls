@@ -50,9 +50,45 @@ public class AnimalLocator {
             "says": "cluck cluck"
         }
     }
-
-    
-
-
-
 */
+
+
+@isTest
+global class AnimalLocatorMock  implements HttpCalloutMock {
+    // Implement this interface method
+    global HTTPResponse respond(HTTPRequest request) {
+        // Create a fake response
+        HttpResponse response = new HttpResponse();
+        response.setHeader('Content-Type', 'application/json');
+        response.setBody('{ "animal": {"id": 1, "name": "chicken", "eats": "chicken food", "says": "cluck cluck" }} ');
+        response.setStatusCode(200);
+        return response; 
+    }
+}
+
+@IsTest
+public class AnimalLocatorTest {
+      @isTest
+     public static void checkResult(){
+         // Set mock callout class 
+    	Test.setMock(HttpCalloutMock.class, new AnimalHttpCalloutMock());    
+        //HttpResponse response = AnimalLocator.getAnimalNameById(1);
+        String animalName = AnimalLocator.getAnimalNameById(1);
+         // Verify that the response received contains fake values
+        /*String contentType = response.getHeader('Content-Type');
+        System.assert(contentType == 'application/json');
+        String actualValue = response.getBody();
+        System.debug(response.getBody());
+        String expectedValue = '{"animal": {"id": 1, "name": "chicken", "eats": "chicken food", "says": "cluck cluck" }}';
+        System.assertEquals(actualValue, expectedValue);
+        System.assertEquals(200, response.getStatusCode());*/
+        System.assertEquals(animalName,'chicken'); 
+         
+    }
+     
+}
+
+
+
+
+
