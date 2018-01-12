@@ -1,0 +1,61 @@
+<apex:page standardController="Opportunity" extensions="OpportunityStagesController">
+   <apex:pageBlock title="Opportunities Based on Stages, Using wrapper class"> 
+       <apex:pageblockTable value="{!opps}" var="eachOpp">
+           <apex:column value="{!eachOpp.stageName}"> 
+               <apex:facet name="header">Stage</apex:facet>
+           </apex:column>
+           <apex:column value="{!eachOpp.amount}"> 
+               <apex:facet name="header">Amount</apex:facet>
+           </apex:column>
+       </apex:pageblockTable>
+       <apex:pageBlock title="Display Opportunities in VF , Using Map">
+           <apex:pageblockTable value="{!mapOpps}" var="eachMapOpp" >
+               <apex:column headerValue="Stage">
+               {!eachMapOpp}
+               </apex:column> 
+               <apex:column headerValue="Amount">
+               {!mapOpps[eachMapOpp]}
+               </apex:column> 
+           </apex:pageblockTable>
+       </apex:pageBlock>
+       
+       
+   </apex:pageBlock>
+</apex:page>
+
+
+/*----- Display opportunities based on Stages----
+        Author : Simi Tresa Antony
+--------*/
+public with sharing class OpportunityStagesController {
+    public ApexPages.StandardController con;
+    public List<AggregateResult> oppList{get;set;}
+    public List<OppBasedOnStages> opps {get;set;}
+    public Map<String,Decimal> mapOpps {get;set;}
+    
+    public OpportunityStagesController(ApexPages.StandardController controller) {
+            con = controller;  
+            //------Get all Opportunities amounts  based on stages using Aggregate Query---//
+            oppList = [select sum(Amount) amount,StageName from Opportunity group by StageName ]; 
+            
+            //---- Display the Opportunities with wrapper classes----//
+            opps = new List<OppBasedOnStages>();
+            
+            //---- Display the Opportunities with Map classes----//
+            mapOpps = new Map<String,Decimal>();
+            
+            for(AggregateResult res:oppList){ 
+                 opps.add(new OppBasedOnStages(res)); 
+                 mapOpps.put((String)res.get('StageName'),(Decimal)res.get('amount')); 
+            }  
+    }  
+    //---- Display the Opportunities with wrapper classes----//
+    public class OppBasedOnStages{
+        public String stageName{get;set;}
+        public Decimal amount{get;set;}
+        public OppBasedOnStages(AggregateResult ar){
+            stageName = (String)ar.get('StageName');
+            amount    = (Decimal)ar.get('amount');
+        }
+    } 
+}
