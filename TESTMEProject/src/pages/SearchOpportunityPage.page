@@ -1,0 +1,39 @@
+<!--  Author Simi Tresa Antony -->
+<apex:page controller="SearchOpportunity">
+<apex:slds />
+<div class="slds-scope">
+    <apex:pageBlock title="Look Up Opportunity by Product Name">
+        <apex:pageMessages />
+        <apex:form >
+            <label>Enter product name : </label>
+            <apex:inputText value="{!searchTerm}"/> <!--required="true"-->
+            <apex:commandButton action="{!searchOpp}" value="search" id="searchBtn"/>
+
+        </apex:form>
+    </apex:pageBlock>
+<!-- use fieldsets---->
+    <apex:outputPanel id="OpptyDisplay" rendered="{!hasLineItems}"> 
+    <!--- Todo use fieldsets------>
+        <apex:pageBlock title="Results"> 
+            <apex:pageBlockTable value="{!lineItems}" var="eachItem">
+                 <apex:column >
+                   <apex:facet name="header">Name</apex:facet> 
+                   <a href="/{!eachItem.id}" target="_blank"> {!eachItem.name}</a> 
+                </apex:column> 
+                 <apex:column >
+                    <apex:facet name="header">Amount</apex:facet>
+                    {!eachItem.amount}
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">Stage Name</apex:facet>
+                    {!eachItem.StageName}
+                </apex:column> 
+                <apex:column >
+                    <apex:facet name="header">Main Product</apex:facet>
+                    {!eachItem.Main_Product__c}
+                </apex:column> 
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:outputPanel>
+</div>
+</apex:page>
