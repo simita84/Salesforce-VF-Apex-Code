@@ -1,3 +1,6 @@
+/**
+ *  Author : Simi Tresa Antony
+**/
 public class OpportunityTriggerService {
     
     /** This method will prevent the deletion of Opportunity if there 

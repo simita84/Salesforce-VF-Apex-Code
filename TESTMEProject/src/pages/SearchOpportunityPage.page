@@ -1,4 +1,7 @@
-<!--  Author Simi Tresa Antony -->
+<!--   
+        This page is used to display all the opportunities for users where users could search with the porduct name
+        Author Simi Tresa Antony 
+-->
 <apex:page controller="SearchOpportunity">
 <apex:slds />
 <div class="slds-scope">
